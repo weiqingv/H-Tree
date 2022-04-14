@@ -34,6 +34,19 @@ public class HTree {
     }
 
     public void insert(Subscription sub) {
+        String route = buildRoute(sub);
+
+        List<String> bucketList;
+        if (buckets.containsKey(route)) {
+            bucketList = buckets.get(route);
+        } else {
+            bucketList = new LinkedList<>();
+        }
+        bucketList.add(sub.getId());
+        buckets.put(route, bucketList);
+    }
+
+    private String buildRoute(Subscription sub) {
         sub.sortConstraints();
         StringBuilder routeBuilder = new StringBuilder();
         for (Subscription.Constraint constraint : sub.getConstraints()) {
@@ -56,19 +69,11 @@ public class HTree {
             }
         }
 
-        String route = routeBuilder.toString();
-        List<String> bucketList;
-        if (buckets.containsKey(route)) {
-            bucketList = buckets.get(route);
-        } else {
-            bucketList = new LinkedList<>();
-        }
-        bucketList.add(sub.getId());
-        buckets.put(route, bucketList);
+        return routeBuilder.toString();
     }
 
     // judge the value belongs to this cell or the next cell
-    public int judgeCellAttribution(String attribute, double value, int index) {
+    private int judgeCellAttribution(String attribute, double value, int index) {
         List<Cell> cellList = cells.get(attribute);
         if (index + 1 >= cellList.size() - 1)
             return index;    // no next index
@@ -77,6 +82,16 @@ public class HTree {
             return index;
         else
             return index + 1;   // overlap
+    }
+
+    // return true if the deletion succeeds.
+    public boolean delete(String subID) {
+        if (!SubscriptionStore.subscriptionMap.containsKey(subID))
+            return false;
+        Subscription sub = SubscriptionStore.subscriptionMap.get(subID);
+        String route = buildRoute(sub);
+        List<String> bucketList = buckets.get(route);
+        return bucketList.remove(sub.id);
     }
 
     public List<String> match(Publication pub) {

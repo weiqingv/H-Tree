@@ -8,8 +8,7 @@ import java.util.List;
 
 public class HTreeTest {
 
-    @Test
-    public void TestInsertAndMatch() {
+    public HTree buildHTree() {
         List<String> attributes = new ArrayList<>();
         attributes.add("1");
         attributes.add("2");
@@ -79,6 +78,13 @@ public class HTreeTest {
         tree.insert(sub8);
         tree.insert(sub9);
 
+        return tree;
+    }
+
+    @Test
+    public void testInsertAndMatch() {
+        HTree tree = buildHTree();
+
         Publication pub1 = new Publication();
         pub1.addAttribute("1", 0.24);
         pub1.addAttribute("2", 0.82);
@@ -87,5 +93,20 @@ public class HTreeTest {
 
         assert matchedIDs.size() == 1;
         assert matchedIDs.get(0).equals("sub1");
+    }
+
+    @Test
+    public void testDelete() {
+        HTree tree = buildHTree();
+
+        Publication pub1 = new Publication();
+        pub1.addAttribute("1", 0.24);
+        pub1.addAttribute("2", 0.82);
+
+        tree.delete("sub1");
+
+        List<String> matchedIDs = tree.match(pub1);
+
+        assert matchedIDs.size() == 0;
     }
 }
